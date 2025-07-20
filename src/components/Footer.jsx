@@ -1,11 +1,7 @@
-import React from "react";
-
-function Footer() {
+export default function Footer() {
   return (
-    <footer className="bg-gray-200 text-center p-4 text-sm">
-      &copy; {new Date().getFullYear()} Mapog Technologies. All rights reserved.
+    <footer className="bg-gray-800 text-white text-center p-4">
+      <p>&copy; {new Date().getFullYear()} Mapog ®. All rights reserved.</p>
     </footer>
   );
 }
-
-export default Footer;
