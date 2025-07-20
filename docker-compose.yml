@@ -1,0 +1,38 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./mapog-msms-api
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    env_file:
+      - ./mapog-msms-api/.env
+    restart: always
+    depends_on:
+      - mongo
+
+  frontend:
+    build:
+      context: ./mapog-msms-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    restart: always
+    depends_on:
+      - backend
+
+  mongo:
+    image: mongo:8.0
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mapogadmin
+      MONGO_INITDB_ROOT_PASSWORD: your_mongodb_password
+    volumes:
+      - mongo-data:/data/db
+
+volumes:
+  mongo-data:
