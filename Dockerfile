@@ -1,21 +1,13 @@
-# Use node 22 slim image
-FROM node:22-slim
-
-# Set working directory
+# Frontend Dockerfile
+FROM node:22-alpine as build
 WORKDIR /app
-
-# Install dependencies
 COPY package*.json ./
 RUN npm install
-
-# Copy all files
 COPY . .
-
-# Build frontend
 RUN npm run build
 
-# Expose port
-EXPOSE 3000
-
-# Start application
-CMD ["npm", "start"]
+# Serve with Nginx
+FROM nginx:stable-alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
