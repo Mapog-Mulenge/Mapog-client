@@ -1,19 +1,21 @@
-# Build Stage
-FROM node:22-alpine as build
+# Use node 22 slim image
+FROM node:22-slim
 
+# Set working directory
 WORKDIR /app
 
+# Install dependencies
 COPY package*.json ./
 RUN npm install
 
+# Copy all files
 COPY . .
+
+# Build frontend
 RUN npm run build
 
-# Serve using Nginx
-FROM nginx:alpine
+# Expose port
+EXPOSE 3000
 
-COPY --from=build /app/build /usr/share/nginx/html
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+# Start application
+CMD ["npm", "start"]
