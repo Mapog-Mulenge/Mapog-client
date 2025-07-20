@@ -1,17 +1,17 @@
-# Use official Node.js LTS version
+# Use official Node.js LTS image
 FROM node:22-alpine
 
 # Set working directory
-WORKDIR /app
+WORKDIR /usr/src/app
 
-# Copy package.json and install dependencies
+# Install dependencies
 COPY package*.json ./
 RUN npm install
 
 # Copy app files
 COPY . .
 
-# Build app
+# Build the app
 RUN npm run build
 
 # Expose port
