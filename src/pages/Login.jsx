@@ -1,39 +1,52 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import axios from 'axios';
+import { useRouter } from 'next/router';
 
-function Login() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate();
+export default function Login() {
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Call API for login
-    localStorage.setItem("token", "dummy_token");
-    navigate("/dashboard");
+    try {
+      const res = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/login`,
+        { email, password }
+      );
+      localStorage.setItem('token', res.data.token);
+      router.push('/dashboard');
+    } catch (err) {
+      setError('Invalid credentials');
+    }
   };
 
   return (
-    <div className="max-w-sm mx-auto mt-10 p-4 border rounded">
-      <h2 className="text-xl font-bold mb-4">Login</h2>
-      <form onSubmit={handleSubmit} className="space-y-3">
+    <div className="flex items-center justify-center h-screen bg-gray-100">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded shadow-md w-96"
+      >
+        <h2 className="text-2xl font-bold mb-4">Login</h2>
+        {error && <p className="text-red-500">{error}</p>}
         <input
           type="email"
           placeholder="Email"
-          value={email}
+          className="w-full p-2 border rounded mb-4"
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full p-2 border rounded"
+          required
         />
         <input
           type="password"
           placeholder="Password"
-          value={password}
+          className="w-full p-2 border rounded mb-4"
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full p-2 border rounded"
+          required
         />
         <button
           type="submit"
-          className="w-full bg-blue-800 text-white py-2 rounded"
+          className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700"
         >
           Login
         </button>
@@ -41,5 +54,3 @@ function Login() {
     </div>
   );
 }
-
-export default Login;
