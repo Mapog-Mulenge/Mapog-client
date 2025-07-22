@@ -1,21 +1,19 @@
-# Use official Node.js LTS image
-FROM node:22-alpine
+# Use a minimal Node base for building
+FROM node:22-alpine AS builder
+WORKDIR /app
 
-# Set working directory
-WORKDIR /usr/src/app
-
-# Install dependencies
 COPY package*.json ./
-RUN npm install
+RUN npm ci
 
-# Copy app files
 COPY . .
-
-# Build the app
 RUN npm run build
 
-# Expose port
-EXPOSE 3000
+# Use lightweight NGINX for serving
+FROM nginx:1.25-alpine
+COPY --from=builder /app/out /usr/share/nginx/html
 
-# Start app
-CMD ["npm", "start"]
+# Harden nginx config
+COPY nginx.conf /etc/nginx/nginx.conf
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
