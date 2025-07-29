@@ -1,0 +1,9 @@
+{
+  "appId": "com.mulengesystems.mapog",
+  "appName": "Mapog",
+  "webDir": "out",
+  "server": {
+    "url": "https://mapog.vercel.app",
+    "cleartext": true
+  }
+}
