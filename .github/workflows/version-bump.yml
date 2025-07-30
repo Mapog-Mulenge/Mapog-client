@@ -1,4 +1,4 @@
-name: Auto Version Bump
+name: Auto Version Bump & Tag
 
 on:
   push:
@@ -12,10 +12,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup Node
+      - name: Setup Node 22
         uses: actions/setup-node@v3
         with:
           node-version: 22
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
 
       - name: Run bump script
         run: node scripts/bump-version.js
@@ -25,5 +29,11 @@ jobs:
           git config user.name "github-actions"
           git config user.email "actions@github.com"
           git add capacitor.config.json
-          git commit -m "chore: auto bump version"
+          git commit -m "chore: auto bump version [skip ci]" || echo "No changes to commit"
           git push
+
+      - name: Create Git Tag
+        run: |
+          VERSION=$(node -p "require('./capacitor.config.json').version")
+          git tag v$VERSION
+          git push origin v$VERSION
