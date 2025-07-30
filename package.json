@@ -1,3 +1,4 @@
+{
  "name": "mapog-msms-frontend",
   "version": "1.0.0",
   "description": "Mapog School Management System Frontend",
@@ -29,3 +30,4 @@
     "tailwindcss": "^3.4.0",
     "jwt-decode": "^3.1.2"
   }
+}
