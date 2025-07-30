@@ -1,16 +1,24 @@
-# Use a minimal Node base for building
+# Stage 1: Build
 FROM node:22-alpine AS builder
 WORKDIR /app
 
+# Copy package files first for dependency caching
 COPY package*.json ./
+
+# Install dependencies
 RUN npm install
+
+# Copy project files
+COPY . .
+
+# Build & export Next.js
 RUN npm run build
 RUN npm run export
 
-COPY . .
-
-# Use lightweight NGINX for serving
+# Stage 2: Production - Serve with NGINX
 FROM nginx:1.25-alpine
+
+# Copy exported static files
 COPY --from=builder /app/out /usr/share/nginx/html
 
 # Harden nginx config
