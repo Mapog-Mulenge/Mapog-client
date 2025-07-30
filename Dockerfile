@@ -2,13 +2,13 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
 
-# Copy package files for caching
+# Copy package files first for dependency caching
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Install dependencies using lock file
+RUN npm ci
 
-# Copy project files
+# Copy all project files
 COPY . .
 
 # Build & export Next.js
@@ -18,10 +18,10 @@ RUN npm run export
 # Stage 2: Production - Serve with NGINX
 FROM nginx:1.25-alpine
 
-# Copy exported static files
+# Copy exported static files to nginx web root
 COPY --from=builder /app/out /usr/share/nginx/html
 
-# Copy custom nginx config (with offline support & caching)
+# Copy hardened nginx config
 COPY nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
