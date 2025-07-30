@@ -7,6 +7,7 @@ RUN npm install
 
 COPY . .
 RUN npm run build
+RUN npm run export
 
 # Use lightweight NGINX for serving
 FROM nginx:1.25-alpine
