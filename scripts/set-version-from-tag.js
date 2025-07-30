@@ -6,12 +6,20 @@ const execSync = require("child_process").execSync;
 const latestTag = execSync("git describe --tags --abbrev=0").toString().trim();
 const version = latestTag.replace(/^v/, ""); // remove v prefix
 
-console.log(`🔍 Using version from tag: ${version}`);
+// Get commit count since tag
+const commitCount = execSync(`git rev-list ${latestTag}..HEAD --count`).toString().trim() || "0";
+const buildNumber = commitCount === "0" ? "1" : commitCount;
+
+console.log(`🔍 Version: ${version}, Build Number: ${buildNumber}`);
 
 // Update capacitor.config.json
 const capConfigPath = path.join(__dirname, "..", "capacitor.config.json");
 const capConfig = require(capConfigPath);
 capConfig.version = version;
+capConfig.ios = capConfig.ios || {};
+capConfig.ios.buildNumber = buildNumber;
+capConfig.android = capConfig.android || {};
+capConfig.android.versionCode = parseInt(buildNumber);
 fs.writeFileSync(capConfigPath, JSON.stringify(capConfig, null, 2));
 
 // Update package.json
@@ -20,4 +28,4 @@ const pkg = require(pkgPath);
 pkg.version = version;
 fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
 
-console.log(`✅ Version updated to ${version} in both capacitor.config.json and package.json`);
+console.log(`✅ Updated to Version ${version} (Build ${buildNumber})`);
