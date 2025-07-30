@@ -2,7 +2,7 @@
 FROM node:22-alpine AS builder
 WORKDIR /app
 
-# Copy package files first for dependency caching
+# Copy package files for caching
 COPY package*.json ./
 
 # Install dependencies
@@ -21,7 +21,7 @@ FROM nginx:1.25-alpine
 # Copy exported static files
 COPY --from=builder /app/out /usr/share/nginx/html
 
-# Harden nginx config
+# Copy custom nginx config (with offline support & caching)
 COPY nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 80
