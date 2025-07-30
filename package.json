@@ -1,9 +1,7 @@
-{
-  "name": "mapog-msms-frontend",
+ "name": "mapog-msms-frontend",
   "version": "1.0.0",
   "description": "Mapog School Management System Frontend",
   "main": "index.js"
-},
   "engines": {
   "node": "22.13.1",
   "npm": "10.9.0"
