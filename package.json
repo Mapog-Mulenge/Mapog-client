@@ -4,8 +4,8 @@
   "description": "Mapog School Management System Frontend",
   "main": "index.js",
   "engines": {
-    "node": "22.13.1",
-    "npm": "10.9.0"
+    "node": "22.17.1",
+    "npm": "10.9.2"
   },
   "scripts": {
     "dev": "next dev",
