@@ -1,1 +1,38 @@
+name: Sync Frontend to Capacitor
 
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Frontend
+        uses: actions/checkout@v3
+
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+
+      - name: Install dependencies & Build
+        run: |
+          npm install
+          npm run build
+          npm run export
+
+      - name: Push build to Capacitor repo
+        env:
+          GITHUB_TOKEN: ${{ secrets.CAPACITOR_REPO_TOKEN }}
+        run: |
+          git clone https://x-access-token:${GITHUB_TOKEN}@github.com/YOUR-USER/capacitor-repo.git capacitor-sync
+          rm -rf capacitor-sync/www/*
+          cp -r out/* capacitor-sync/www/
+          cd capacitor-sync
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add www
+          git commit -m "Auto-sync build from frontend at $(date +'%Y-%m-%d %H:%M:%S')" || echo "No changes"
+          git push
