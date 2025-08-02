@@ -1,41 +1,93 @@
-name: Version Bump
+name: Frontend CI/CD
 
 on:
   push:
     branches:
       - main
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      release-type:
+        description: "Type of release"
+        required: true
+        default: "patch"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
 
 jobs:
-  bump-version:
+  # -------------------------------
+  # 1️⃣ BUILD & PUSH DOCKER
+  # -------------------------------
+  build-and-push:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repo
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Extract Version
+        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker Image
+        run: |
+          docker build \
+            --build-arg NODE_ENV=production \
+            -t mapog/frontend:${{ env.VERSION }} \
+            -t mapog/frontend:latest .
+
+      - name: Push Docker Image
+        run: |
+          docker push mapog/frontend:${{ env.VERSION }}
+          docker push mapog/frontend:latest
+
+  # -------------------------------
+  # 2️⃣ CREATE RELEASE
+  # -------------------------------
+  release:
+    needs: build-and-push
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Frontend Release ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # -------------------------------
+  # 3️⃣ VERSION BUMP
+  # -------------------------------
+  bump-version:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 22
-
-      - name: Configure Git
+      - name: Setup Git
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
 
-      - name: Bump version
+      - name: Bump Version
         run: |
-          npm version patch -m "Bump version to %s" || echo "No version bump needed"
+          npm version ${{ github.event.inputs.release-type }} -m "chore: bump version to %s"
 
-      - name: Push changes
-        run: |
-          git push origin main || echo "No changes to push"
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ steps.bump.outputs.new_version }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push Changes
+        run: git push origin main --follow-tags
