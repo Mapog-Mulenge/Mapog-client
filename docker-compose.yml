@@ -8,8 +8,8 @@ services:
       args:
         NODE_ENV: production
       cache_from:
-        - mapog/frontend:latest
-    image: mapog/frontend:1.0.0
+        - mapog/mapog-client:latest
+    image: mapog/mapog-client:1.0.0
     ports:
       - "3000:3000"
     environment:
