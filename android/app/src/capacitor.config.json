@@ -1,0 +1,23 @@
+{
+  "appId": "xyz.mapog.app",
+  "appName": "Mapog",
+  "version": "1.0.0",
+  "ios": {
+    "buildNumber": "1",
+    "minVersion": "1.0.0",
+    "equivalentVersion": "1.0.0",
+    "maxVersion": "1.9.9"
+  },
+  "android": {
+    "versionCode": 1,
+    "minVersion": "1.0.0",
+    "equivalentVersion": "1.0.0",
+    "maxVersion": "1.9.9"
+  },
+  "webDir": "dist",
+  "server": {
+    "url": "https://mapog.vercel.app",
+    "cleartext": true,
+    "bundledWebRuntime": false
+  }
+}
