@@ -1,4 +1,4 @@
-name: Auto Version Bump & Tag
+name: Version Bump
 
 on:
   push:
@@ -6,34 +6,36 @@ on:
       - main
 
 jobs:
-  bump:
+  bump-version:
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
 
-      - name: Setup Node 22
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
         uses: actions/setup-node@v3
         with:
           node-version: 22
-          cache: 'npm'
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Run bump script
-        run: node scripts/bump-version.js
-
-      - name: Commit updated version
+      - name: Configure Git
         run: |
           git config user.name "github-actions"
           git config user.email "actions@github.com"
-          git add capacitor.config.json
-          git commit -m "chore: auto bump version [skip ci]" || echo "No changes to commit"
-          git push
 
-      - name: Create Git Tag
+      - name: Bump version
         run: |
-          VERSION=$(node -p "require('./capacitor.config.json').version")
-          git tag v$VERSION
-          git push origin v$VERSION
+          npm version patch -m "Bump version to %s" || echo "No version bump needed"
+
+      - name: Push changes
+        run: |
+          git push origin main || echo "No changes to push"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.bump.outputs.new_version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
